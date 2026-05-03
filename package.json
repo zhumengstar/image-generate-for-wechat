@@ -1,0 +1,15 @@
+{
+  "name": "ai-image-studio-uni",
+  "version": "1.0.0",
+  "description": "Single-page uni-app mini program for AI text-to-image and image editing",
+  "scripts": {
+    "check": "node --check main.js && node --check common/image-service.js && node --check common/config.js"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "browserslist": [
+    "last 3 versions",
+    "Android >= 5",
+    "iOS >= 9"
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "appid": "wx6aa479ffc03709f2",
+  "projectname": "ai-image-studio-uni",
+  "compileType": "miniprogram",
+  "libVersion": "3.15.2",
+  "srcMiniprogramRoot": "unpackage/dist/dev/mp-weixin/",
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "postcss": true,
+    "minified": false,
+    "enhance": false,
+    "useCompilerPlugins": false,
+    "packNpmRelationList": [],
+    "babelSetting": {
+      "ignore": [],
+      "disablePlugins": [],
+      "outputPath": ""
+    }
+  },
+  "packOptions": {
+    "ignore": [
+      { "type": "folder", "value": "node_modules" },
+      { "type": "folder", "value": "src" },
+      { "type": "folder", "value": "dist" },
+      { "type": "folder", "value": "build" },
+      { "type": "folder", "value": "mock" },
+      { "type": "folder", "value": "tests" }
+    ]
+  }
+}

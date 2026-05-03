@@ -1,0 +1,24 @@
+{
+  "pages": [
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationBarTitleText": "AI图片工坊",
+        "navigationStyle": "custom",
+        "backgroundColor": "#f6f6f6"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "AI图片工坊",
+    "navigationBarBackgroundColor": "#f6f6f6",
+    "backgroundColor": "#f6f6f6",
+    "app-plus": {
+      "background": "#f6f6f6"
+    }
+  },
+  "easycom": {
+    "autoscan": true
+  }
+}
