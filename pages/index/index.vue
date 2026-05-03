@@ -3,10 +3,8 @@
     <view class="topbar" @tap="hideKeyboard">
       <view class="status-space" :style="{ height: statusBarHeight + 'px' }"></view>
       <view class="title-row" :style="{ paddingRight: navRightPadding + 'px' }">
-        <view class="brand">
-          <text class="brand-name">images-generate</text>
-        </view>
-        <view class="mode-chip" @tap="toggleMode">{{ currentModeLabel }}</view>
+        <text class="brand-name">images-generate</text>
+        <view class="mode-chip" @tap.stop="toggleMode">{{ currentModeLabel }}</view>
       </view>
 
       <scroll-view class="quota-row" scroll-x :show-scrollbar="false">
@@ -17,12 +15,12 @@
     </view>
 
     <view class="action-row" @tap="hideKeyboard">
-      <view class="history-button" @tap="openHistory">
+      <view class="history-button" @tap.stop="openHistory">
         <text class="history-dot"></text>
-        <text>历史记录（{{ conversations.length }}）</text>
+        <text class="history-text">历史记录（{{ conversations.length }}）</text>
       </view>
-      <view class="new-button" @tap="newDraft">+ 新建</view>
-      <view :class="activeConversationId ? 'delete-button' : 'delete-button disabled'" @tap="deleteActive">删除</view>
+      <view class="new-button" @tap.stop="newDraft">+ 新建</view>
+      <view :class="activeConversationId ? 'delete-button' : 'delete-button disabled'" @tap.stop="deleteActive">删除</view>
     </view>
 
     <scroll-view class="result-scroll" scroll-y :show-scrollbar="false" :scroll-with-animation="true" @tap="hideKeyboard">
@@ -42,7 +40,7 @@
 
           <view v-if="turn.sourcePath" class="source-preview">
             <text class="source-label">参考图</text>
-            <image class="source-image" :src="turn.sourcePath" mode="aspectFill" @tap="previewImage(turn.sourcePath)"></image>
+            <image class="source-image" :src="turn.sourcePath" mode="aspectFill" @tap.stop="previewImage(turn.sourcePath)"></image>
           </view>
 
           <view class="result-tags">
@@ -63,10 +61,10 @@
               class="result-image"
               :src="turn.imageUrl || mockImage"
               :mode="turn.ratio === '9:16' || turn.ratio === '3:4' ? 'aspectFill' : 'widthFix'"
-              @tap="previewImage(turn.imageUrl || mockImage)"
+              @tap.stop="previewImage(turn.imageUrl || mockImage)"
             ></image>
             <view class="image-footer">
-              <view>
+              <view class="image-meta">
                 <text class="result-title">结果 1</text>
                 <text class="result-meta">{{ turn.meta }}</text>
               </view>
@@ -74,10 +72,10 @@
             </view>
           </view>
 
-          <view class="result-actions">
-            <view class="small-action" @tap="copyPrompt(turn.prompt)">复制提示词</view>
-            <view class="small-action" @tap="regenerate(turn)">重新生成</view>
-            <view class="small-action dark" @tap="saveImage(turn)">保存图片</view>
+          <view class="result-actions" @tap.stop>
+            <view class="small-action" @tap.stop="copyPrompt(turn.prompt)">复制提示词</view>
+            <view class="small-action" @tap.stop="regenerate(turn)">重新生成</view>
+            <view class="small-action dark" @tap.stop="saveImage(turn)">保存图片</view>
           </view>
         </view>
       </view>
@@ -90,6 +88,7 @@
 
     <view class="composer" :style="{ transform: keyboardTransform }" @tap.stop="keepKeyboard">
       <textarea
+        :key="inputVersion"
         v-model="prompt"
         class="prompt-input"
         maxlength="800"
@@ -118,7 +117,7 @@
           <text class="tool-plus">+</text>
         </view>
         <view class="quota-mini">{{ quotaLeft }}/{{ quotaTotal }}</view>
-        <view class="tool-pill" @tap.stop="keepKeyboardOpenCountSheet">
+        <view class="tool-pill count" @tap.stop="keepKeyboardOpenCountSheet">
           <text>张数</text>
           <text>{{ imageCount }}</text>
         </view>
@@ -230,6 +229,7 @@ export default {
       keyboardHeight: 0,
       inputFocused: false,
       keepKeyboardNextBlur: false,
+      inputVersion: 0,
       hasModelApi: hasImageModelApi(),
       mockImage: '/static/mock-result.jpg',
       conversations: [],
@@ -330,9 +330,7 @@ export default {
       this.inputFocused = false
       this.keyboardHeight = 0
       this.closeSheets()
-      if (uni.hideKeyboard) {
-        uni.hideKeyboard()
-      }
+      if (uni.hideKeyboard) uni.hideKeyboard()
     },
     keepKeyboardPreview(src) {
       this.keepKeyboard()
@@ -364,9 +362,7 @@ export default {
     },
     toggleMode() {
       this.mode = this.mode === 'generate' ? 'edit' : 'generate'
-      if (this.mode === 'generate') {
-        this.sourcePath = ''
-      }
+      if (this.mode === 'generate') this.sourcePath = ''
     },
     newDraft() {
       this.prompt = ''
@@ -439,8 +435,12 @@ export default {
     ensureConversation(prompt, time) {
       if (this.activeConversation) return this.activeConversation
       const id = makeId()
-      const title = prompt.length > 12 ? `${prompt.slice(0, 12)}...` : prompt
-      const conversation = { id, title, updatedAt: time, turns: [] }
+      const conversation = {
+        id,
+        title: prompt.length > 12 ? `${prompt.slice(0, 12)}...` : prompt,
+        updatedAt: time,
+        turns: []
+      }
       this.conversations.unshift(conversation)
       this.activeConversationId = id
       return conversation
@@ -482,20 +482,8 @@ export default {
         let modelResult = null
         if (this.hasModelApi) {
           modelResult = mode === 'edit'
-            ? await createEditTask({
-              sourcePath,
-              prompt,
-              style: '写实摄影',
-              ratio: this.ratio,
-              quality: 'standard'
-            })
-            : await createArtwork({
-              prompt,
-              negativePrompt: '',
-              style: '写实摄影',
-              ratio: this.ratio,
-              quality: 'standard'
-            })
+            ? await createEditTask({ sourcePath, prompt, style: '写实摄影', ratio: this.ratio, quality: 'standard' })
+            : await createArtwork({ prompt, negativePrompt: '', style: '写实摄影', ratio: this.ratio, quality: 'standard' })
         } else {
           await wait(700)
         }
@@ -524,10 +512,7 @@ export default {
     },
     previewImage(src) {
       if (!src) return
-      uni.previewImage({
-        current: src,
-        urls: [src]
-      })
+      uni.previewImage({ current: src, urls: [src] })
     },
     regenerate(turn) {
       this.prompt = turn.prompt
@@ -535,6 +520,7 @@ export default {
       this.mode = 'edit'
       this.ratio = turn.ratio || this.ratio
       this.imageCount = turn.count || 1
+      this.inputVersion += 1
       this.inputFocused = true
       uni.showToast({ title: '图片和提示词已回填', icon: 'none' })
     },
@@ -563,7 +549,6 @@ export default {
   right: 0;
   top: 0;
   bottom: 0;
-  height: auto;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -583,21 +568,16 @@ export default {
 
 .title-row {
   height: 82rpx;
-  padding: 0 24rpx;
+  padding-left: 24rpx;
   display: flex;
   align-items: center;
   justify-content: space-between;
   box-sizing: border-box;
 }
 
-.brand {
-  display: flex;
-  align-items: center;
-  min-width: 0;
-}
-
 .brand-name {
-  max-width: 320rpx;
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -676,7 +656,14 @@ export default {
   box-shadow: 0 8rpx 22rpx rgba(0, 0, 0, 0.08);
 }
 
+.history-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .history-dot {
+  flex: 0 0 auto;
   width: 16rpx;
   height: 16rpx;
   margin-right: 14rpx;
@@ -840,6 +827,10 @@ export default {
   box-sizing: border-box;
 }
 
+.image-meta {
+  min-width: 0;
+}
+
 .result-title,
 .result-meta {
   display: block;
@@ -859,6 +850,7 @@ export default {
 
 .result-status {
   flex: 0 0 auto;
+  margin-left: 16rpx;
   color: #999999;
   font-size: 22rpx;
 }
@@ -939,7 +931,6 @@ export default {
   margin: 0 24rpx 14rpx;
   display: flex;
   align-items: center;
-  gap: 12rpx;
 }
 
 .reference-thumb {
@@ -1007,8 +998,6 @@ export default {
 }
 
 .tool-button.active {
-  width: 58rpx;
-  background: transparent;
   color: #111111;
 }
 
@@ -1037,6 +1026,10 @@ export default {
 .tool-pill text:first-child {
   margin-right: 8rpx;
   color: #777777;
+}
+
+.tool-pill.count {
+  flex: 0 0 120rpx;
 }
 
 .tool-pill.ratio {
