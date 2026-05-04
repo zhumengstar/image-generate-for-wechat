@@ -113,17 +113,19 @@
       </view>
 
       <view class="tool-row">
-        <view :class="sourcePath ? 'tool-button active' : 'tool-button'" @tap.stop="keepKeyboardChooseImage">
-          <text class="tool-plus">+</text>
-        </view>
-        <view class="quota-mini">{{ quotaLeft }}/{{ quotaTotal }}</view>
-        <view class="tool-pill count" @tap.stop="keepKeyboardOpenCountSheet">
-          <text>张数</text>
-          <text>{{ imageCount }}</text>
-        </view>
-        <view class="tool-pill ratio" @tap.stop="keepKeyboardOpenRatioSheet">
-          <text>比例</text>
-          <text class="ratio-text">{{ ratioLabel }}</text>
+        <view class="tool-left">
+          <view :class="sourcePath ? 'tool-button active' : 'tool-button'" @tap.stop="keepKeyboardChooseImage">
+            <text class="tool-plus">+</text>
+          </view>
+          <view class="quota-mini">{{ quotaLeft }}/{{ quotaTotal }}</view>
+          <view class="tool-pill count" @tap.stop="keepKeyboardOpenCountSheet">
+            <text>张数</text>
+            <text>{{ imageCount }}</text>
+          </view>
+          <view class="tool-pill ratio" @tap.stop="keepKeyboardOpenRatioSheet">
+            <text>比例</text>
+            <text class="ratio-text">{{ ratioLabel }}</text>
+          </view>
         </view>
         <view :class="canSubmit ? 'send-button' : 'send-button disabled'" @tap.stop="submit">
           <text class="send-arrow">↑</text>
@@ -482,8 +484,8 @@ export default {
         let modelResult = null
         if (this.hasModelApi) {
           modelResult = mode === 'edit'
-            ? await createEditTask({ sourcePath, prompt, style: '写实摄影', ratio: this.ratio, quality: 'standard' })
-            : await createArtwork({ prompt, negativePrompt: '', style: '写实摄影', ratio: this.ratio, quality: 'standard' })
+            ? await createEditTask({ sourcePath, prompt, style: '写实摄影', ratio: this.ratio, quality: 'standard', count: this.imageCount })
+            : await createArtwork({ prompt, negativePrompt: '', style: '写实摄影', ratio: this.ratio, quality: 'standard', count: this.imageCount })
         } else {
           await wait(700)
         }
@@ -971,8 +973,16 @@ export default {
   padding: 10rpx 14rpx;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   border-top: 1rpx solid #f1f1f1;
   box-sizing: border-box;
+}
+
+.tool-left {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
 }
 
 .tool-button,
@@ -1046,6 +1056,7 @@ export default {
 }
 
 .send-button {
+  flex: 0 0 68rpx;
   width: 68rpx;
   height: 68rpx;
   margin-left: 8rpx;
@@ -1226,5 +1237,85 @@ export default {
   text-align: center;
   font-size: 22rpx;
   font-weight: 700;
+}
+
+@media screen and (min-width: 768px) {
+  .composer {
+    margin-left: 56rpx;
+    margin-right: 56rpx;
+    margin-bottom: 28rpx;
+    border-radius: 34rpx;
+  }
+
+  .prompt-input {
+    height: 118rpx;
+    padding: 28rpx 44rpx 8rpx;
+    font-size: 26rpx;
+  }
+
+  .reference-strip {
+    margin: 4rpx 44rpx 20rpx;
+  }
+
+  .reference-thumb {
+    flex-basis: 88rpx;
+    width: 88rpx;
+    height: 88rpx;
+    border-radius: 16rpx;
+  }
+
+  .reference-image {
+    border-radius: 16rpx;
+  }
+
+  .tool-row {
+    min-height: 96rpx;
+    padding: 14rpx 36rpx 18rpx;
+  }
+
+  .tool-button,
+  .quota-mini,
+  .tool-pill {
+    height: 64rpx;
+  }
+
+  .tool-button {
+    width: 72rpx;
+  }
+
+  .quota-mini {
+    width: 132rpx;
+    margin-left: 18rpx;
+  }
+
+  .tool-pill {
+    margin-left: 18rpx;
+    padding: 0 30rpx;
+  }
+
+  .tool-pill.count {
+    flex-basis: 150rpx;
+  }
+
+  .tool-pill.ratio {
+    flex: 0 1 260rpx;
+  }
+
+  .ratio-text {
+    max-width: 160rpx;
+  }
+
+  .send-button {
+    flex-basis: 72rpx;
+    width: 72rpx;
+    height: 72rpx;
+    margin-left: 24rpx;
+  }
+
+  .option-sheet {
+    left: 56rpx;
+    right: 56rpx;
+    bottom: 244rpx;
+  }
 }
 </style>
